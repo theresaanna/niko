@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+<form action="{{ url_for('register') }}" method="post">
+  <input type="text" name="username" value="person"></input>
+  <input type="text" name="email" value=""></input>
+  <input type="submit"></input>
+</form>
+{% endblock %}
