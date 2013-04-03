@@ -89,24 +89,23 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
   if request.method == 'POST':
-    db_user = query_db('select * from users where username=?', (request.form.get('username'), ), one=True)
-    if db_user:
-      g.user = User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
-      if g.user.check_password(request.form.get('password')):
-        login_user(g.user, remember=True)
-        return redirect(url_for('dashboard'))
-      return 'nope'
+    g.user = load_user(request.form.get('username'))
+    if g.user.check_password(request.form.get('password')):
+      login_user(g.user, remember=True)
+      return redirect(url_for('dashboard'))
+    return 'nope'
   return render_template('login.html') 
 
 # registration form
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
   if request.method == 'POST':
+    if query_db('select id from users where username=?', (request.form['username'],)):
+      return 'This username is already taken'
     user = User(request.form['username'], request.form['email'], request.form['password'], '', register=True)
     g.db.execute('insert into users (username, email, password) values (?, ?, ?)', 
                 [user.username, user.email, user.hashed_pw])
     g.db.commit()
-    flash('registered!')
     return redirect(url_for('login_page'))
   return render_template('create-user.html')    
 
