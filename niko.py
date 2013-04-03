@@ -1,6 +1,6 @@
 # I am a mess.
 
-import sqlite3
+import sqlite3, datetime, time
 from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -59,8 +59,7 @@ class Mood():
       self.store_mood()
 
   def store_mood(self):
-    entry = query_db('insert into entries (mood, user, entry_date) values (?, ?, ?)', (self.value, self.user, self.entry_date))
-    self.id = entry.id
+    entry = query_db('insert into entries (mood, user, entry_date) values (?, ?, ?)', [self.value, self.user, self.entry_date])
 
 # dependency of flask-login
 @login_manager.user_loader
@@ -113,14 +112,17 @@ def register_user():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-  return render_template('dashboard.html')
+  return render_template('dashboard.html', user = g.user)
 
 # record mood entry
 @app.route('/log', methods=['POST'])
 @login_required
 def log_mood():
-
-  return
+  if request.method == 'POST':
+    entry_date = time.mktime(datetime.datetime.now().timetuple()) if request.form['entry_for'] == 'today' else ''
+    Mood(request.form['mood'], request.form['uid'], entry_date, new=True) 
+    return 'thanks'
+  return 'try again'
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True)
