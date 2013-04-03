@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config.db = '/home/ubuntu/niko/db/niko.db'
 
 # this... doesn't feel right
-app.secret_key = '\xbb\xed,\xe3\xf1\xd4\xf5\x84\xd0\x96_\x9d~y\xfb)s\xfa13\xc7\x0b\x08\xe9'
+app.secret_key = 'hi'
 
 def connect_db():
   return sqlite3.connect(app.config.db)
@@ -28,18 +28,24 @@ login_manager = LoginManager()
 login_manager.setup_app(app)
 
 class User(UserMixin):
-  def __init__(self, username, email, password, id, active=True):
+  def __init__(self, username, email, password, id, register=False):
     self.username = username
     self.email = email
-    self.set_password(password)
+    self.password = password
     self.id = id
-    self.active = active
+    self.register = register
+    if register:
+      self.hash_password(password)
+      self.set_id()
 
-  def set_password(self, password):
-    self.hashed_pw = generate_password_hash(password)
+  def hash_password(self, password):
+    self.hashed_pw = generate_password_hash(str(password))
 
-  def check_password(self, password):
-    return check_password_hash(self.hashed_pw, password)
+  def check_password(self, form_password):
+    return check_password_hash(self.password, str(form_password))
+
+  def set_id():
+    self.id = query_db('select id from users where username=?', (self.username,))
 
 @login_manager.user_loader
 def load_user(id):
@@ -53,27 +59,26 @@ def query_db(query, args=(), one=False):
 
 @app.route('/')
 def index():
-  if g.user is not None and g.user.is_authenticated():
+  if g.user is not None:
     return redirect(url_for('dashboard'))
   return redirect(url_for('login_page'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
   if request.method == 'POST':
-    form_username = request.form.get('username')
-    db_user = query_db('select * from users where username=?', (form_username, ), one=True)
+    db_user = query_db('select * from users where username=?', (request.form.get('username'), ), one=True)
     if db_user:
       g.user = User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
       if g.user.check_password(request.form.get('password')):
         login_user(g.user, remember=True)
         return redirect(url_for('dashboard'))
-      return redirect(url_for('login_page'))
+      return 'nope'
   return render_template('login.html') 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
   if request.method == 'POST':
-    user = User(request.form['username'], request.form['email'], request.form['password'])
+    user = User(request.form['username'], request.form['email'], request.form['password'], '', register=True)
     g.db.execute('insert into users (username, email, password) values (?, ?, ?)', 
                 [user.username, user.email, user.hashed_pw])
     g.db.commit()
