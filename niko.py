@@ -12,23 +12,26 @@ app.config.db = '/home/ubuntu/niko/db/niko.db'
 # this... doesn't feel right
 app.secret_key = 'hi'
 
+# db communication setup
 def connect_db():
   return sqlite3.connect(app.config.db)
 
 @app.before_request
 def before_request():
   g.db = connect_db()
-  g.user = current_user
+  if current_user is not None:
+    g.user = current_user
 
 @app.teardown_request
 def teardown_request(exception):
   g.db.close()
 
+# flask-login init
 login_manager = LoginManager()
 login_manager.setup_app(app)
 
 class User(UserMixin):
-  def __init__(self, username, email, password, id, register=False):
+  def __init__(self, username, email, password, id, register=False, active=True):
     self.username = username
     self.email = email
     self.password = password
@@ -47,22 +50,42 @@ class User(UserMixin):
   def set_id():
     self.id = query_db('select id from users where username=?', (self.username,))
 
-@login_manager.user_loader
-def load_user(id):
-  return g.user   
+class Mood():
+  def __init__(self, value, user, entry_date, new=False):
+    self.value = value
+    self.user = user
+    self.entry_date = entry_date
+    if new:
+      self.store_mood()
 
+  def store_mood(self):
+    entry = query_db('insert into entries (mood, user, entry_date) values (?, ?, ?)', (self.value, self.user, self.entry_date))
+    self.id = entry.id
+
+# dependency of flask-login
+@login_manager.user_loader
+def load_user(hook):
+  param_type = "id" if int(hook) else "username"
+  db_user = query_db('select username, email, password, id from users where (' + param_type + ' = ?)', (hook,), one=True)
+  return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
+
+# helpers
+# gives nice return value from db query
 def query_db(query, args=(), one=False):
     cur = g.db.execute(query, args)
     rv = [dict((cur.description[idx][0], value)
                for idx, value in enumerate(row)) for row in cur.fetchall()]
     return (rv[0] if rv else None) if one else rv
 
+# ROUTES
+# index
 @app.route('/')
 def index():
   if g.user is not None:
     return redirect(url_for('dashboard'))
   return redirect(url_for('login_page'))
 
+# login form
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
   if request.method == 'POST':
@@ -75,6 +98,7 @@ def login_page():
       return 'nope'
   return render_template('login.html') 
 
+# registration form
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
   if request.method == 'POST':
@@ -86,18 +110,17 @@ def register_user():
     return redirect(url_for('login_page'))
   return render_template('create-user.html')    
 
+# user dashboard
 @app.route('/dashboard')
+@login_required
 def dashboard():
-  user = g.user
-  return 'dashboard'
+  return render_template('dashboard.html')
 
+# record mood entry
 @app.route('/log', methods=['POST'])
 @login_required
 def log_mood():
-  g.db.execute('insert into entries (user, mood) values (?, ?)',
-              [request.form['user'], request.form['mood']])
-  g.db.commit()
-  flash('Thanks for logging your mood')
+
   return
 
 if __name__ == '__main__':
