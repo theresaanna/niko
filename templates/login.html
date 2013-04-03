@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
-<form action="{{ url_for('login_user') }}" method="post">
-  <input type="hidden" name="user" value="person"></input>
-  <input type="hidden" name="mood" value=""></input>
+{% block body %}
+<form action="{{ url_for('login_page') }}" method="post">
+  <input type="text" name="username" placeholder="username"></input>
+  <input type="text" name="password" placeholder="password"></input>
+  <input type="submit"></input>
 </form>
 {% endblock %}

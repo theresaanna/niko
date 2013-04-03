@@ -1,6 +1,9 @@
+# I am a mess.
+
 import sqlite3
-from flask import Flask, request, session, redirect, url_for, g, render_template, abort
+from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
@@ -15,6 +18,7 @@ def connect_db():
 @app.before_request
 def before_request():
   g.db = connect_db()
+  g.user = current_user
 
 @app.teardown_request
 def teardown_request(exception):
@@ -23,31 +27,64 @@ def teardown_request(exception):
 login_manager = LoginManager()
 login_manager.setup_app(app)
 
+class User(UserMixin):
+  def __init__(self, username, email, password, id, active=True):
+    self.username = username
+    self.email = email
+    self.set_password(password)
+    self.id = id
+    self.active = active
+
+  def set_password(self, password):
+    self.hashed_pw = generate_password_hash(password)
+
+  def check_password(self, password):
+    return check_password_hash(self.hashed_pw, password)
+
 @login_manager.user_loader
-def load_user(userid):
-  return User.get(userid)
+def load_user(id):
+  return g.user   
+
+def query_db(query, args=(), one=False):
+    cur = g.db.execute(query, args)
+    rv = [dict((cur.description[idx][0], value)
+               for idx, value in enumerate(row)) for row in cur.fetchall()]
+    return (rv[0] if rv else None) if one else rv
 
 @app.route('/')
-def main_page():
-  if 'username' in session:
+def index():
+  if g.user is not None and g.user.is_authenticated():
     return redirect(url_for('dashboard'))
-  return redirect(url_for('login_user'))
+  return redirect(url_for('login_page'))
 
 @app.route('/login', methods=['GET', 'POST'])
-def login_user():
+def login_page():
   if request.method == 'POST':
-    form = LoginForm()
-    if form.validate_on_submit():
-      login_user(user)
-      flash('Welcome back')
-      return redirect(url_for('dashboard'))
-  return 'login form' 
+    form_username = request.form.get('username')
+    db_user = query_db('select * from users where username=?', (form_username, ), one=True)
+    if db_user:
+      g.user = User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
+      if g.user.check_password(request.form.get('password')):
+        login_user(g.user, remember=True)
+        return redirect(url_for('dashboard'))
+      return redirect(url_for('login_page'))
+  return render_template('login.html') 
+
+@app.route('/register', methods=['GET', 'POST'])
+def register_user():
+  if request.method == 'POST':
+    user = User(request.form['username'], request.form['email'], request.form['password'])
+    g.db.execute('insert into users (username, email, password) values (?, ?, ?)', 
+                [user.username, user.email, user.hashed_pw])
+    g.db.commit()
+    flash('registered!')
+    return redirect(url_for('login_page'))
+  return render_template('create-user.html')    
 
 @app.route('/dashboard')
 def dashboard():
-  if 'username' in session:
-    return 'dashboard'
-  return redirect(url_for('login_user'))
+  user = g.user
+  return 'dashboard'
 
 @app.route('/log', methods=['POST'])
 @login_required
