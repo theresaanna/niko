@@ -55,7 +55,8 @@ class Mood():
     self.value = value
     self.user = user
     self.entry_date = entry_date
-    if new:
+    self.new = new
+    if self.new:
       self.store_mood()
 
   def store_mood(self):
@@ -112,6 +113,8 @@ def register_user():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+  # if user has a mood for today
+  # change form in template
   return render_template('dashboard.html', user = g.user)
 
 # record mood entry
@@ -121,7 +124,7 @@ def log_mood():
   if request.method == 'POST':
     entry_date = time.mktime(datetime.datetime.now().timetuple()) if request.form['entry_for'] == 'today' else ''
     Mood(request.form['mood'], request.form['uid'], entry_date, new=True) 
-    return 'thanks'
+    return redirect(url_for('dashboard'))
   return 'try again'
 
 if __name__ == '__main__':
