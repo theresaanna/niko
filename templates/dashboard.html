@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+<span class="tab selected">Today</span>
+<span class="tab">Yesterday</span>
+<h3>How's it going, {{ user.username }}?</h3>
+<form action="{{ url_for('log_mood') }}" method="post">
+  <input type="radio" name="mood" value="1">
+  <input type="radio" name="mood" value="2">
+  <input type="radio" name="mood" value="3">
+  <input type="radio" name="mood" value="4">
+  <input type="radio" name="mood" value="5">
+  <input type="hidden" name="entry_for" value="today">
+  <input type="hidden" name="uid" value="{{ user.id }}">
+  <input type="submit"></input>
+</form>
+{% endblock %}
