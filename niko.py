@@ -61,6 +61,7 @@ class Mood():
 
   def store_mood(self):
     entry = query_db('insert into entries (mood, user, entry_date) values (?, ?, ?)', [self.value, self.user, self.entry_date])
+    g.db.commit()
 
 # dependency of flask-login
 @login_manager.user_loader
@@ -116,6 +117,14 @@ def dashboard():
   # if user has a mood for today
   # change form in template
   return render_template('dashboard.html', user = g.user)
+
+# chart request
+@app.route('/chart', methods=['GET', 'POST'])
+@login_required
+def chart():
+  if request.method == 'POST':
+    'hi'  
+  return render_template('chart.html')
 
 # record mood entry
 @app.route('/log', methods=['POST'])
