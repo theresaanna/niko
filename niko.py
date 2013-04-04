@@ -1,6 +1,8 @@
 # I am a mess.
 
-import sqlite3, datetime, time
+import sqlite3, datetime, time, calendar
+from datetime import timedelta
+from calendar import timegm
 from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -78,11 +80,61 @@ def query_db(query, args=(), one=False):
                for idx, value in enumerate(row)) for row in cur.fetchall()]
     return (rv[0] if rv else None) if one else rv
 
+# timespan = tuple(recent date, oldest date)
+def get_moods(timespan):
+  assert not isinstance(timespan, basestring)
+  return query_db('select * from entries where entry_date > ? and entry_date < ?', (timespan[0], timespan[1]))
+
+def get_team_members():
+  return query_db('select username, id from users')
+
+# returns monday of last week
+def get_one_week_ago():
+  today = datetime.datetime.now()
+  # is there not a better way? cause wow.
+  return int(calendar.timegm((today - timedelta(days=today.weekday()) + timedelta(days=0, weeks=-1)).timetuple()))
+
+# returns friday of last week
+def get_last_available_day():
+  today = datetime.datetime.now()
+  return int(calendar.timegm((today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)).timetuple()))
+
+def get_date_yesterday():
+  return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
+
+def get_last_week():
+  return get_moods((get_one_week_ago(), get_last_available_day()))
+
+def get_this_month():
+  return
+
+def get_last_month():
+  return
+
+chart_request_params = {
+  1: get_last_week,
+  2: get_this_month,
+  3: get_last_month
+}
+# {
+#   user: [(time, mood), (time, mood)]
+# }
+def assemble_chart(period):
+  moods = chart_request_params[int(period)]()  
+  template_data = {}
+  for record in moods:
+    mood = (record['entry_date'], record['mood'])
+    if template_data.get(record['user']):
+      template_data[record['user']].append(mood)  
+    else:
+      template_data[record['user']] = [mood]
+  return template_data
+
 # ROUTES
 # index
 @app.route('/')
 def index():
-  if g.user is not None:
+  if g.user.is_authenticated():
     return redirect(url_for('dashboard'))
   return redirect(url_for('login_page'))
 
@@ -123,44 +175,8 @@ def dashboard():
 @login_required
 def show_chart():
   if request.method == 'POST':
-    time_periods = {
-      '1': 'lastweek',
-      '2': 'bymonth',
-      '3': 'bymonth',
-      '4': 'byquarter',
-      '5': 'byyear',
-      '6': 'alltime'
-    }
-    redirect(url_for('show_chart_' + time_periods[request.form('time_period')]))
-  return render_template('chart.html')
-
-# chart by week
-@app.route('/chart/lastweek')
-@login_required
-def show_chart_lastweek():
-  return
-
-# chart by month
-@app.route('/chart/bymonth')
-@login_required
-def show_chart_bymonth(which):
-  return
-
-# chart by quarter
-@app.route('/chart/byquarter')
-@login_required
-def show_chart_byquarter():
-  return
-
-@app.route('/chart/byyear')
-@login_required
-def show_chart_byyear():
-  return
-
-@app.route('/chart/alltime')
-@login_required
-def show_chart_alltime():
-  return 'dude, what kind of UI wizard do you think I am? This would be insane to display. use the export!'
+    return render_template('chart.html', chart = assemble_chart(request.form['time_period']))
+  return render_template('dashboard.html', user = g.user)
 
 @app.route('/export')
 @login_required
@@ -173,7 +189,7 @@ def export_data():
 @login_required
 def log_mood():
   if request.method == 'POST':
-    entry_date = time.mktime(datetime.datetime.now().timetuple()) if request.form['entry_for'] == 'today' else ''
+    entry_date = int(calendar.timegm(datetime.datetime.now().timetuple())) if request.form['entry_for'] == 'today' else get_date_yesterday()
     Mood(request.form['mood'], request.form['uid'], entry_date, new=True) 
     return redirect(url_for('dashboard'))
   return 'try again'

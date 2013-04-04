@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block body %}
+{{ chart }}
+<table class="chart {{ chart.timespan }}">
+  <tr class="header">
+    <td>M</td>
+    <td>Tu</td>
+    <td>W</td>
+    <td>Th</td>
+    <td>F</td>
+  </tr>
+  <tr class="user">
+    <td></td>
+  </tr>
+</table>
+{% endblock %}
