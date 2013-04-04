@@ -13,4 +13,18 @@
   <input type="hidden" name="uid" value="{{ user.id }}">
   <input type="submit"></input>
 </form>
+
+<h4>Check out some charts</h4>
+<form action="{{ url_for('show_chart') }}" method="post">
+  <label>I'd like to see the chart from</label>
+  <select name="time_period">
+    <option value="1" selected>last week</option>
+    <option value="2">this month</option>
+    <option value="3">last month</option>
+    <option value="4">this quarter</option>
+    <option value="5">this year</option>
+    <option value="6">ALL TIME!</option>
+  </select>,
+  <input type="submit" value="please"></input>.
+</form>
 {% endblock %}

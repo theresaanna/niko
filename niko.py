@@ -121,10 +121,52 @@ def dashboard():
 # chart request
 @app.route('/chart', methods=['GET', 'POST'])
 @login_required
-def chart():
+def show_chart():
   if request.method == 'POST':
-    'hi'  
+    time_periods = {
+      '1': 'lastweek',
+      '2': 'bymonth',
+      '3': 'bymonth',
+      '4': 'byquarter',
+      '5': 'byyear',
+      '6': 'alltime'
+    }
+    redirect(url_for('show_chart_' + time_periods[request.form('time_period')]))
   return render_template('chart.html')
+
+# chart by week
+@app.route('/chart/lastweek')
+@login_required
+def show_chart_lastweek():
+  return
+
+# chart by month
+@app.route('/chart/bymonth')
+@login_required
+def show_chart_bymonth(which):
+  return
+
+# chart by quarter
+@app.route('/chart/byquarter')
+@login_required
+def show_chart_byquarter():
+  return
+
+@app.route('/chart/byyear')
+@login_required
+def show_chart_byyear():
+  return
+
+@app.route('/chart/alltime')
+@login_required
+def show_chart_alltime():
+  return 'dude, what kind of UI wizard do you think I am? This would be insane to display. use the export!'
+
+@app.route('/export')
+@login_required
+def export_data():
+  # throw out a csv or something
+  return
 
 # record mood entry
 @app.route('/log', methods=['POST'])
