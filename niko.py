@@ -127,5 +127,10 @@ def log_mood():
     return redirect(url_for('dashboard'))
   return 'try again'
 
+# potential future bot endpoint
+@app.route('/nikobot', methods=['POST'])
+def nikobot_log():
+  return
+
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True)
