@@ -128,7 +128,7 @@ def get_date_yesterday():
 
 def get_date_range(start_date, end_date):
   date_range = []
-  for one_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days)):
+  for one_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days + 1)):
     date_range.append(get_date_string(one_date))
   return date_range
 
