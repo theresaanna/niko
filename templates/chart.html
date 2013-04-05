@@ -1,25 +1,31 @@
 {% extends "layout.html" %}
 {% block body %}
 {{ chart }}
-<script src="../static/js/chart.js"></script>
+{{ weekdays }}
 <table class="chart {{ timespan }}">
-  <tr class="header">
-    <td>M</td>
-    <td>Tu</td>
-    <td>W</td>
-    <td>Th</td>
-    <td>F</td>
+  <tr class="weekday-header">
+  <td></td>
+  {% for day in weekdays %}
+    <td>{{ day }}</td>
+  {% endfor %}
   </tr>
+
+  <tr class="date-header">
+  <td></td>
+  {% for date in chart.date_range %}
+    <td>{{ date }}</td>
+  {% endfor %}
+  </tr>
+
+  {% for user, records in chart.user_records.items() %}
+  <tr>
+    <td>{{ user }}</td>
+    {% for record in records %}
+      <td>{{ record[0] }}</td> 
+    {% endfor %}
+  </tr>
+  {% endfor %}
   
-<script id="user-row">
-  <tr class="user">
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-</script>
 
 </table>
 {% endblock %}

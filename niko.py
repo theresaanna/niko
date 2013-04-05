@@ -155,19 +155,18 @@ chart_time_map = {
   3: 'month'
 }
 
-# {
-#   user: [(time, mood), (time, mood)]
-# }
+# yuck
 def assemble_chart(period):
   moods = chart_request_params[int(period)]()  
   template_data = {}
   template_data['date_range'] = moods.pop()
+  template_data['user_records'] = {}
   for record in moods[0]:
     mood = {get_date(record['entry_date']): record['mood']}
-    if template_data.get(record['username']):
-      template_data[record['username']].append(mood)  
+    if template_data['user_records'].get(record['username']):
+      template_data['user_records'][record['username']].append(mood)  
     else:
-      template_data[record['username']] = [mood]
+      template_data['user_records'][record['username']] = [mood]
   return template_data
 
 # ROUTES
@@ -210,12 +209,14 @@ def dashboard():
   # change form in template
   return render_template('dashboard.html', user = g.user)
 
+days_of_week = ['M', 'Tu', 'W', 'Th', 'F']
+
 # chart request
 @app.route('/chart', methods=['GET', 'POST'])
 @login_required
 def show_chart():
   if request.method == 'POST':
-    return render_template('chart.html', chart = json.dumps(assemble_chart(request.form['time_period'])), timespan = chart_time_map[int(request.form['time_period'])])
+    return render_template('chart.html', chart = assemble_chart(request.form['time_period']), timespan = chart_time_map[int(request.form['time_period'])], weekdays =  days_of_week)
   return render_template('dashboard.html', user = g.user)
 
 @app.route('/export')
