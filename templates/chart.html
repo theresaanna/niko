@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 {{ chart }}
-<table class="chart {{ chart.timespan }}">
+<script src="../static/js/chart.js"></script>
+<table class="chart {{ timespan }}">
   <tr class="header">
     <td>M</td>
     <td>Tu</td>
@@ -9,8 +10,12 @@
     <td>Th</td>
     <td>F</td>
   </tr>
+  
+<script id="user-row">
   <tr class="user">
     <td></td>
   </tr>
+</script>
+
 </table>
 {% endblock %}

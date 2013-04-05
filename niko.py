@@ -1,6 +1,6 @@
 # I am a mess.
 
-import sqlite3, datetime, time, calendar
+import sqlite3, datetime, time, calendar, json
 from datetime import timedelta
 from calendar import timegm
 from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
@@ -132,6 +132,12 @@ chart_request_params = {
   3: get_last_month
 }
 
+chart_time_map = {
+  1: 'week',
+  2: 'month',
+  3: 'month'
+}
+
 # {
 #   user: [(time, mood), (time, mood)]
 # }
@@ -191,7 +197,7 @@ def dashboard():
 @login_required
 def show_chart():
   if request.method == 'POST':
-    return render_template('chart.html', chart = assemble_chart(request.form['time_period']))
+    return render_template('chart.html', chart = json.dumps(assemble_chart(request.form['time_period'])), timespan = chart_time_map[int(request.form['time_period'])])
   return render_template('dashboard.html', user = g.user)
 
 @app.route('/export')
