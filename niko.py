@@ -120,7 +120,7 @@ def get_date_yesterday():
 def get_last_week():
   monday = get_one_week_ago()
   friday = get_last_available_day()
-  return [get_moods((monday, friday)), (monday, friday)] 
+  return [get_moods((monday, friday)), (get_date(monday), get_date(friday))] 
 
 def get_this_month():
   return
