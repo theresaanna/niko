@@ -49,28 +49,36 @@ class User(UserMixin):
   def check_password(self, form_password):
     return check_password_hash(self.password, str(form_password))
 
-  def set_id():
+  def set_id(self):
     self.id = query_db('select id from users where username=?', (self.username,))
 
 class Mood():
-  def __init__(self, value, user, entry_date, new=False):
+  def __init__(self, value, userid, username, entry_date, new=False):
     self.value = value
-    self.user = user
+    self.userid = userid
+    self.username = username
     self.entry_date = entry_date
     self.new = new
     if self.new:
       self.store_mood()
 
   def store_mood(self):
-    entry = query_db('insert into entries (mood, user, entry_date) values (?, ?, ?)', [self.value, self.user, self.entry_date])
+    entry = query_db('insert into entries (mood, userid, username, entry_date) values (?, ?, ?)', [self.value, self.userid, self.username, self.entry_date])
     g.db.commit()
 
 # dependency of flask-login
+# does flask-login tear this down somewhere?
+# get a nonetype, not callable error if I call it
 @login_manager.user_loader
 def load_user(hook):
-  param_type = "id" if int(hook) else "username"
+  return create_user_instance(hook)
+
+def create_user_instance(hook):
+  param_type = "id" if isinstance(hook, int) else "username"
   db_user = query_db('select username, email, password, id from users where (' + param_type + ' = ?)', (hook,), one=True)
-  return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
+  if db_user:
+    return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
+  return None
 
 # helpers
 # gives nice return value from db query
@@ -83,7 +91,7 @@ def query_db(query, args=(), one=False):
 # timespan = tuple(recent date, oldest date)
 def get_moods(timespan):
   assert not isinstance(timespan, basestring)
-  return query_db('select * from entries where entry_date > ? and entry_date < ?', (timespan[0], timespan[1]))
+  return query_db('select * from entries where entry_date > ? and entry_date < ? order by entry_date asc', (timespan[0], timespan[1]))
 
 def get_team_members():
   return query_db('select username, id from users')
@@ -98,6 +106,11 @@ def get_one_week_ago():
 def get_last_available_day():
   today = datetime.datetime.now()
   return int(calendar.timegm((today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)).timetuple()))
+
+# takes unix timestamp
+# returns date in format of 01-01-70
+def get_date(timestamp):
+  return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%m-%d-%y')
 
 def get_date_yesterday():
   return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
@@ -116,6 +129,7 @@ chart_request_params = {
   2: get_this_month,
   3: get_last_month
 }
+
 # {
 #   user: [(time, mood), (time, mood)]
 # }
@@ -123,11 +137,11 @@ def assemble_chart(period):
   moods = chart_request_params[int(period)]()  
   template_data = {}
   for record in moods:
-    mood = (record['entry_date'], record['mood'])
-    if template_data.get(record['user']):
-      template_data[record['user']].append(mood)  
+    mood = {get_date(record['entry_date']): record['mood']}
+    if template_data.get(record['username']):
+      template_data[record['username']].append(mood)  
     else:
-      template_data[record['user']] = [mood]
+      template_data[record['username']] = [mood]
   return template_data
 
 # ROUTES
@@ -142,7 +156,7 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
   if request.method == 'POST':
-    g.user = load_user(request.form.get('username'))
+    g.user = create_user_instance(request.form.get('username'))
     if g.user.check_password(request.form.get('password')):
       login_user(g.user, remember=True)
       return redirect(url_for('dashboard'))

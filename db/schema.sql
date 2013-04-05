@@ -7,7 +7,8 @@ create table users (
 
 create table entries (
   id integer primary key,
-  user integer,
+  userid integer,
+  username string,
   mood integer,
   entry_date integer
 );
