@@ -118,7 +118,9 @@ def get_date_yesterday():
   return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
 
 def get_last_week():
-  return get_moods((get_one_week_ago(), get_last_available_day()))
+  monday = get_one_week_ago()
+  friday = get_last_available_day()
+  return [get_moods((monday, friday)), (monday, friday)] 
 
 def get_this_month():
   return
@@ -144,7 +146,8 @@ chart_time_map = {
 def assemble_chart(period):
   moods = chart_request_params[int(period)]()  
   template_data = {}
-  for record in moods:
+  template_data['date_range'] = moods.pop()
+  for record in moods[0]:
     mood = {get_date(record['entry_date']): record['mood']}
     if template_data.get(record['username']):
       template_data[record['username']].append(mood)  
