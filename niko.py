@@ -108,6 +108,13 @@ def get_last_available_day():
   today = datetime.datetime.now()
   return today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)
 
+# takes datetime obj
+# returns '01-01-70'
+def get_date_string(date):
+  return get_date(get_unix_timestamp(date))
+
+# takes datetime obj
+# returns unix timestamp
 def get_unix_timestamp(date):
   return int(calendar.timegm(date.timetuple()))
 
@@ -119,13 +126,16 @@ def get_date(timestamp):
 def get_date_yesterday():
   return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
 
-def get_date_range(dates):
-  return
+def get_date_range(start_date, end_date):
+  date_range = []
+  for one_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days)):
+    date_range.append(get_date_string(one_date))
+  return date_range
 
 def get_last_week():
   monday = get_one_week_ago()
   friday = get_last_available_day()
-  return [get_moods((get_unix_timestamp(monday), get_unix_timestamp(friday))), get_date_range((monday, friday))] 
+  return [get_moods((get_unix_timestamp(monday), get_unix_timestamp(friday))), get_date_range(monday, friday)] 
 
 def get_this_month():
   return
