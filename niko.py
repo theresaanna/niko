@@ -49,7 +49,7 @@ class User(UserMixin):
   def check_password(self, form_password):
     return check_password_hash(self.password, str(form_password))
 
-  def set_id():
+  def set_id(self):
     self.id = query_db('select id from users where username=?', (self.username,))
 
 class Mood():
@@ -83,7 +83,7 @@ def query_db(query, args=(), one=False):
 # timespan = tuple(recent date, oldest date)
 def get_moods(timespan):
   assert not isinstance(timespan, basestring)
-  return query_db('select * from entries where entry_date > ? and entry_date < ?', (timespan[0], timespan[1]))
+  return query_db('select * from entries where entry_date > ? and entry_date < ? order by entry_date asc', (timespan[0], timespan[1]))
 
 def get_team_members():
   return query_db('select username, id from users')
@@ -98,6 +98,11 @@ def get_one_week_ago():
 def get_last_available_day():
   today = datetime.datetime.now()
   return int(calendar.timegm((today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)).timetuple()))
+
+# takes unix timestamp
+# returns date in format of 01-01-70
+def get_date(timestamp):
+  return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%m-%d-%y')
 
 def get_date_yesterday():
   return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
@@ -116,6 +121,7 @@ chart_request_params = {
   2: get_this_month,
   3: get_last_month
 }
+
 # {
 #   user: [(time, mood), (time, mood)]
 # }
@@ -123,11 +129,11 @@ def assemble_chart(period):
   moods = chart_request_params[int(period)]()  
   template_data = {}
   for record in moods:
-    mood = (record['entry_date'], record['mood'])
-    if template_data.get(record['user']):
-      template_data[record['user']].append(mood)  
+    mood = {get_date(record['entry_date']): record['mood']}
+    if template_data.get(record['username']):
+      template_data[record['username']].append(mood)  
     else:
-      template_data[record['user']] = [mood]
+      template_data[record['username']] = [mood]
   return template_data
 
 # ROUTES
