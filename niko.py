@@ -63,19 +63,21 @@ class Mood():
       self.store_mood()
 
   def store_mood(self):
-    entry = query_db('insert into entries (mood, userid, username, entry_date) values (?, ?, ?)', [self.value, self.userid, self.username, self.entry_date])
+    entry = query_db('insert into entries (mood, userid, username, entry_date) values (?, ?, ?, ?)', [self.value, self.userid, self.username, self.entry_date])
     g.db.commit()
 
 # dependency of flask-login
 # does flask-login tear this down somewhere?
 # get a nonetype, not callable error if I call it
 @login_manager.user_loader
-def load_user(hook):
-  return create_user_instance(hook)
+def load_user_by_id(id):
+  return create_user_instance(id, 'id')
 
-def create_user_instance(hook):
-  param_type = "id" if isinstance(hook, int) else "username"
-  db_user = query_db('select username, email, password, id from users where (' + param_type + ' = ?)', (hook,), one=True)
+def load_user_by_name(username):
+  return create_user_instance(username, 'username')
+
+def create_user_instance(identifier, param_type):
+  db_user = query_db('select username, email, password, id from users where (' + param_type + ' = ?)', (identifier,), one=True)
   if db_user:
     return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
   return None
@@ -156,7 +158,7 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
   if request.method == 'POST':
-    g.user = create_user_instance(request.form.get('username'))
+    g.user = load_user_by_name(request.form.get('username'))
     if g.user.check_password(request.form.get('password')):
       login_user(g.user, remember=True)
       return redirect(url_for('dashboard'))
@@ -204,7 +206,7 @@ def export_data():
 def log_mood():
   if request.method == 'POST':
     entry_date = int(calendar.timegm(datetime.datetime.now().timetuple())) if request.form['entry_for'] == 'today' else get_date_yesterday()
-    Mood(request.form['mood'], request.form['uid'], entry_date, new=True) 
+    Mood(request.form['mood'], request.form['userid'], request.form['username'], entry_date, new=True) 
     return redirect(url_for('dashboard'))
   return 'try again'
 
