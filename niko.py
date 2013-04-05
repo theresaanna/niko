@@ -101,13 +101,15 @@ def get_team_members():
 # returns monday of last week
 def get_one_week_ago():
   today = datetime.datetime.now()
-  # is there not a better way? cause wow.
-  return int(calendar.timegm((today - timedelta(days=today.weekday()) + timedelta(days=0, weeks=-1)).timetuple()))
+  return today - timedelta(days=today.weekday()) + timedelta(days=0, weeks=-1)
 
 # returns friday of last week
 def get_last_available_day():
   today = datetime.datetime.now()
-  return int(calendar.timegm((today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)).timetuple()))
+  return today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)
+
+def get_unix_timestamp(date):
+  return int(calendar.timegm(date.timetuple()))
 
 # takes unix timestamp
 # returns date in format of 01-01-70
@@ -117,10 +119,13 @@ def get_date(timestamp):
 def get_date_yesterday():
   return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
 
+def get_date_range(dates):
+  return
+
 def get_last_week():
   monday = get_one_week_ago()
   friday = get_last_available_day()
-  return [get_moods((monday, friday)), (get_date(monday), get_date(friday))] 
+  return [get_moods((get_unix_timestamp(monday), get_unix_timestamp(friday))), get_date_range((monday, friday))] 
 
 def get_this_month():
   return
