@@ -20,8 +20,8 @@
   {% for user, records in chart.user_records.items() %}
   <tr>
     <td>{{ user }}</td>
-    {% for record in records %}
-      <td>{{ record[0] }}</td> 
+    {% for date in chart.date_range %}
+      <td>{{ records[0][date] }}</td> 
     {% endfor %}
   </tr>
   {% endfor %}
