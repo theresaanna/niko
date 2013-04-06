@@ -1,5 +1,3 @@
-# I am a mess.
-
 import sqlite3, datetime, time, calendar, json
 from datetime import timedelta
 from calendar import timegm
@@ -7,6 +5,7 @@ from flask import Flask, request, session, redirect, url_for, g, render_template
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# init things
 app = Flask(__name__)
 
 app.config.db = '/home/ubuntu/niko/db/niko.db'
@@ -32,6 +31,7 @@ def teardown_request(exception):
 login_manager = LoginManager()
 login_manager.setup_app(app)
 
+# constructors
 class User(UserMixin):
   def __init__(self, username, email, password, id, register=False, active=True):
     self.username = username
@@ -66,6 +66,8 @@ class Mood():
     entry = query_db('insert into entries (mood, userid, username, entry_date) values (?, ?, ?, ?)', [self.value, self.userid, self.username, self.entry_date])
     g.db.commit()
 
+# helpers
+
 # dependency of flask-login
 # does flask-login tear this down somewhere?
 # get a nonetype, not callable error if I call it
@@ -82,7 +84,6 @@ def create_user_instance(identifier, param_type):
     return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
   return None
 
-# helpers
 # gives nice return value from db query
 def query_db(query, args=(), one=False):
     cur = g.db.execute(query, args)
@@ -123,6 +124,7 @@ def get_unix_timestamp(date):
 def get_date(timestamp):
   return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%m-%d-%y')
 
+# returns unix timestamp 
 def get_date_yesterday():
   return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
 
@@ -145,14 +147,11 @@ def get_last_month():
 
 chart_request_params = {
   1: get_last_week,
-  2: get_this_month,
-  3: get_last_month
 }
 
 chart_time_map = {
   1: 'week',
   2: 'month',
-  3: 'month'
 }
 
 # yuck
@@ -212,12 +211,17 @@ def dashboard():
 days_of_week = ['M', 'Tu', 'W', 'Th', 'F']
 
 # chart request
-@app.route('/chart', methods=['GET', 'POST'])
+@app.route('/chart', methods=['POST'])
 @login_required
 def show_chart():
   if request.method == 'POST':
-    return render_template('chart.html', chart = assemble_chart(request.form['time_period']), timespan = chart_time_map[int(request.form['time_period'])], weekdays =  days_of_week)
+    return redirect(url_for('show_chart_' + chart_time_map[int(request.form['time_period'])]))
   return render_template('dashboard.html', user = g.user)
+
+@app.route('/chart/week')
+@login_required
+def show_chart_week():
+  return render_template('chart_week.html', chart = assemble_chart(1), weekdays = days_of_week)
 
 @app.route('/export')
 @login_required
