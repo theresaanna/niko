@@ -144,7 +144,7 @@ def get_entries_by_month(ref_date=get_last_available_day()):
   if last_day.month == datetime.datetime.now().month:
     last_day = ref_date
 
-  first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(1,0,0), datetime.time(0))
+  first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(0), datetime.time(0))
   return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day, True)]
 
 chart_request_params = {
