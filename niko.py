@@ -147,11 +147,12 @@ def get_last_month():
 
 chart_request_params = {
   1: get_last_week,
+  2: get_this_month
 }
 
 chart_time_map = {
   1: 'week',
-  2: 'month',
+  2: 'month'
 }
 
 # yuck
@@ -222,6 +223,11 @@ def show_chart():
 @login_required
 def show_chart_week():
   return render_template('chart_week.html', chart = assemble_chart(1), weekdays = days_of_week)
+
+@app.route('/chart/month')
+@login_required
+def show_chart_month():
+  return render_template('chart_month.html', chart = assemble_chart(2), weekdays = days_of_week)
 
 @app.route('/export')
 @login_required

@@ -2,30 +2,35 @@
 {% block body %}
 {{ chart }}
 {{ weekdays }}
-<table class="chart week">
-  <tr class="weekday-header">
-  <td></td>
-  {% for day in weekdays %}
-    <td>{{ day }}</td>
-  {% endfor %}
-  </tr>
 
-  <tr class="date-header">
-  <td></td>
-  {% for date in chart.date_range %}
-    <td>{{ date }}</td>
-  {% endfor %}
-  </tr>
-
-  {% for user, records in chart.user_records.items() %}
-  <tr>
-    <td>{{ user }}</td>
-    {% for date in chart.date_range %}
-      <td>{{ records[0][date] }}</td> 
+{% if chart %}
+  <table class="chart week">
+    <tr class="weekday-header">
+    <td></td>
+    {% for day in weekdays %}
+      <td>{{ day }}</td>
     {% endfor %}
-  </tr>
-  {% endfor %}
-  
+    </tr>
 
-</table>
+    <tr class="date-header">
+    <td></td>
+    {% for date in chart.date_range %}
+      <td>{{ date }}</td>
+    {% endfor %}
+    </tr>
+
+    {% for user, records in chart.user_records.items() %}
+    <tr>
+      <td>{{ user }}</td>
+      {% for date in chart.date_range %}
+        {% for record in records %}
+        <td>{{ record[date] }}</td> 
+        {% endfor %}
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+{% else %}
+  Sorry, there's no data for this time period.
+{% endif %}
 {% endblock %}
