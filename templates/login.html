@@ -4,12 +4,13 @@
 <section>
   <form action="{{ url_for('login_page') }}" method="post">
     <div class="form-spacer">
+      <p class="prominent">Niko allows you to track the happiness of your team through quick daily self-reporting.</p>
       <label for="username">Username:</label>
       <input type="text" name="username" placeholder="username"></input>
     </div>
     <div class="form-spacer">
       <label for="password">Password:</label>
-      <input type="text" name="password" placeholder="password"></input>
+      <input type="password" name="password" placeholder="password"></input>
     </div>
     <input type="submit" value="Come on in"></input>
   </form>
