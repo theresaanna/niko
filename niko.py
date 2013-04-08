@@ -137,8 +137,13 @@ def get_entries_by_week():
   friday = get_last_available_day()
   return [get_moods((get_unix_timestamp(monday), get_unix_timestamp(friday))), get_date_range(monday, friday)] 
 
-def get_entries_by_month():
-  pass
+def get_entries_by_month(ref_date=get_last_available_day()):
+  last_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month+1, 1) - datetime.timedelta(1,0,0), datetime.time(23, 59, 59))
+  if last_day.month == datetime.datetime.now().month:
+    last_day = ref_date
+
+  first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(1,0,0), datetime.time(0))
+  return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day)]
 
 chart_request_params = {
   1: get_entries_by_week,
