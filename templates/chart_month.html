@@ -18,7 +18,7 @@
         {% for user, records in chart.user_records.items() %}
           {% for record in records %}
             {% if date in record %}
-            {{ user }}: {{ record[date] }}
+              {{ user }}: {{ record[date] }}
             {% endif %}
           {% endfor %}
         {% endfor %}
