@@ -2,7 +2,7 @@
 {% block body %}
 <form action="{{ url_for('register_user') }}" method="post">
   <input type="text" name="username" placeholder="username" required></input>
-  <input type="text" name="email" placeholder="email" required></input>
+  <input type="email" name="email" placeholder="email" required></input>
   <input type="password" name="password" placeholder="password" required></input>
   <input type="password" name="pw2" placeholder="password again, please" required></input>
   <input type="submit"></input>

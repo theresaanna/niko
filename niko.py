@@ -78,6 +78,7 @@ def load_user_by_id(id):
 def load_user_by_name(username):
   return create_user_instance(username, 'username')
 
+# for creating User objects for existing accounts
 def create_user_instance(identifier, param_type):
   db_user = query_db('select username, email, password, id from users where (' + param_type + ' = ?)', (identifier,), one=True)
   if db_user:
@@ -157,6 +158,20 @@ chart_time_map = {
   2: 'month'
 }
 
+# oh man
+def validate_register_form(form):
+  if not form['username']:
+    return 'Please choose a username'
+  elif not form['email']:
+    return 'Please fill in your email'
+  elif not form['password'] or not form['pw2']:
+    return 'Please set a password and retype to validate'
+  elif form['password'] != form['pw2']:
+    return "Whoops, passwords didn't match. Try again."
+  if query_db('select id from users where username=?', (form['username'],)):
+    return 'This username is already taken'
+  return False
+
 # yuck
 def assemble_chart(period):
   moods = chart_request_params[int(period)]()  
@@ -194,13 +209,16 @@ def login_page():
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
   if request.method == 'POST':
-    if query_db('select id from users where username=?', (request.form['username'],)):
-      return 'This username is already taken'
-    user = User(request.form['username'], request.form['email'], request.form['password'], '', register=True)
-    g.db.execute('insert into users (username, email, password) values (?, ?, ?)', 
+    validation_errors = validate_register_form(request.form)
+    if not validation_errors:
+      user = User(request.form['username'], request.form['email'], request.form['password'], '', register=True)
+      g.db.execute('insert into users (username, email, password) values (?, ?, ?)', 
                 [user.username, user.email, user.hashed_pw])
-    g.db.commit()
-    return redirect(url_for('login_page'))
+      g.db.commit()
+      flash('Welcome!')
+      return redirect(url_for('login_page'))
+    flash(validation_errors)
+    return render_template('create-user.html')
   return render_template('create-user.html')    
 
 # user dashboard

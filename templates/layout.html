@@ -6,6 +6,15 @@
   <link rel="stylesheet" href="../static/css/main.css"></link>
 </head>
 <body>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          {{ message }}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
   {% block body %}{% endblock %}
 </body>
 </html>
