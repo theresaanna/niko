@@ -117,22 +117,28 @@ def get_unix_timestamp(date):
 # takes unix timestamp
 # returns date object
 def get_date(timestamp):
-  return int(calendar.timegm(timestamp.timetuple()))
+  return datetime.datetime.fromtimestamp(timestamp)
 
 # returns unix timestamp 
 def get_date_yesterday():
-  return int(calendar.timegm((datetime.datetime.now() - timedelta(days=1)).timetuple()))
+  return get_unix_timestamp(datetime.datetime.now() - timedelta(days=1))
 
 def get_date_range(start_date, end_date):
   date_range = []
   for one_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days + 1)):
-    date_range.append(get_date_string(one_date))
+    date_range.append(get_pretty_date(one_date))
   return date_range
+
+def get_pretty_date(date):
+  return date.strftime('%m/%d/%Y')
 
 def get_entries_by_week():
   monday = get_one_week_ago()
   friday = get_last_available_day()
   return [get_moods((get_unix_timestamp(monday), get_unix_timestamp(friday))), get_date_range(monday, friday)] 
+
+def get_entries_by_month():
+  pass
 
 chart_request_params = {
   1: get_entries_by_week,
@@ -151,7 +157,7 @@ def assemble_chart(period):
   template_data['date_range'] = moods.pop()
   template_data['user_records'] = {}
   for record in moods[0]:
-    mood = {get_date(record['entry_date']): record['mood']}
+    mood = {get_pretty_date(get_date(record['entry_date'])): record['mood']}
     if template_data['user_records'].get(record['username']):
       template_data['user_records'][record['username']].append(mood)  
     else:
@@ -229,7 +235,7 @@ def export_data():
 @login_required
 def log_mood():
   if request.method == 'POST':
-    entry_date = get_date(datetime.datetime.now()) if request.form['entry_for'] == 'today' else get_date_yesterday()
+    entry_date = get_unix_timestamp(datetime.datetime.now()) if request.form['entry_for'] == 'today' else get_date_yesterday()
     Mood(request.form['mood'], request.form['userid'], request.form['username'], entry_date, new=True) 
     return redirect(url_for('dashboard'))
   return 'try again'
