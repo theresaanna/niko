@@ -1,4 +1,8 @@
-import sqlite3, datetime, time, calendar, json
+import sqlite3
+import datetime
+import time
+import calendar
+import json
 from datetime import timedelta
 from calendar import timegm
 from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
@@ -40,16 +44,16 @@ class User(UserMixin):
     self.id = id
     self.register = register
     if register:
-      self.hash_password(password)
-      self.set_id()
+      self._hash_password(password)
+      self._set_id()
 
-  def hash_password(self, password):
+  def _hash_password(self, password):
     self.hashed_pw = generate_password_hash(str(password))
 
   def check_password(self, form_password):
     return check_password_hash(self.password, str(form_password))
 
-  def set_id(self):
+  def _set_id(self):
     self.id = query_db('select id from users where username=?', (self.username,))
 
 class Mood():
@@ -60,9 +64,9 @@ class Mood():
     self.entry_date = entry_date
     self.new = new
     if self.new:
-      self.store_mood()
+      self._store_mood()
 
-  def store_mood(self):
+  def _store_mood(self):
     entry = query_db('insert into entries (mood, userid, username, entry_date) values (?, ?, ?, ?)', [self.value, self.userid, self.username, self.entry_date])
     g.db.commit()
 
