@@ -1,10 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
-<form action="{{ url_for('register_user') }}" method="post">
-  <input type="text" name="username" placeholder="username" required></input>
-  <input type="email" name="email" placeholder="email" required></input>
-  <input type="password" name="password" placeholder="password" required></input>
-  <input type="password" name="pw2" placeholder="password again, please" required></input>
-  <input type="submit"></input>
-</form>
+
+<section>
+  <form action="{{ url_for('register_user') }}" method="post">
+    <div class="form-spacer">
+      <label for="username">Username:</label>
+      <input type="text" name="username" placeholder="username" required></input>
+    </div>
+    <div class="form-spacer">
+      <label for="email">Email:</label>
+      <input type="email" name="email" placeholder="email" required></input>
+    </div>
+    <div class="form-spacer">
+      <label for="password">Password:</label>
+      <input type="password" name="password" placeholder="password" required></input>
+    </div>
+    <div class="form-spacer">
+      <label for="pw2">Password again, please:</label>
+      <input type="password" name="pw2" placeholder="password again, please" required></input>
+    </div>
+
+    <input type="submit"></input>
+  </form>
+</section>
 {% endblock %}

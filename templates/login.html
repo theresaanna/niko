@@ -1,10 +1,20 @@
 {% extends "layout.html" %}
 {% block body %}
-<form action="{{ url_for('login_page') }}" method="post">
-  <input type="text" name="username" placeholder="username"></input>
-  <input type="text" name="password" placeholder="password"></input>
-  <input type="submit"></input>
-</form>
 
-<a href="/register">Register?</a>
+<section>
+  <form action="{{ url_for('login_page') }}" method="post">
+    <div class="form-spacer">
+      <label for="username">Username:</label>
+      <input type="text" name="username" placeholder="username"></input>
+    </div>
+    <div class="form-spacer">
+      <label for="password">Password:</label>
+      <input type="text" name="password" placeholder="password"></input>
+    </div>
+    <input type="submit" value="Come on in"></input>
+  </form>
+
+  <a href="/register">Register?</a>
+</section>
+
 {% endblock %}

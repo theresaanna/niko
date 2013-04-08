@@ -1,16 +1,21 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<section class="clear">
+<section>
 <span id="today" class="tab selected">Today</span>
 <span id="yesterday" class="tab">Yesterday</span>
 <h2><span id="greeting">How's it going</span>, {{ user.username }}?</h2>
 <form action="{{ url_for('log_mood') }}" method="post">
-  <input type="radio" name="mood" value="1">
-  <input type="radio" name="mood" value="2">
-  <input type="radio" name="mood" value="3">
-  <input type="radio" name="mood" value="4">
-  <input type="radio" name="mood" value="5">
+
+  <div class="form-spacer">
+    <img src="../static/img/1.png" class="mood-face" data-value="1"/>
+    <img src="../static/img/2.png" class="mood-face" data-value="2"/>
+    <img src="../static/img/3.png" class="mood-face" data-value="3"/>
+    <img src="../static/img/4.png" class="mood-face" data-value="4"/>
+    <img src="../static/img/5.png" class="mood-face" data-value="5"/>
+    <input type="hidden" name="mood" id="mood-input" value="">
+  </div>
+
   <input type="hidden" name="entry_for" value="today" id="date-input">
   <input type="hidden" name="userid" value="{{ user.id }}">
   <input type="hidden" name="username" value="{{ user.username }}">

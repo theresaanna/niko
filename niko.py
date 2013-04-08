@@ -162,6 +162,16 @@ chart_time_map = {
   2: 'month'
 }
 
+log_reply_message = {
+  1: "Oh no! Your entry is logged. Please go find a sympathetic ear. Or a hug",
+  2: "Ok, got your entry. Sorry that things aren't going well! Go find a pick-me-up.",
+  3: "Alright, entry stored. Carry on with your meh self.",
+  4: "Thanks, smiley! Your entry was recorded. Rock.",
+  5: "Hey, sunshine! The database did a little dance recording this entry."
+}
+
+days_of_week = ['M', 'Tu', 'W', 'Th', 'F']
+
 # oh man
 def validate_register_form(form):
   if not form['username']:
@@ -240,8 +250,6 @@ def dashboard():
   # change form in template
   return render_template('dashboard.html', user = g.user)
 
-days_of_week = ['M', 'Tu', 'W', 'Th', 'F']
-
 # chart request
 @app.route('/chart', methods=['POST'])
 @login_required
@@ -271,10 +279,13 @@ def export_data():
 @login_required
 def log_mood():
   if request.method == 'POST':
+    if not request.form['mood']:
+      flash('Please select a mood before submitting')
+      return redirect(url_for('dashboard'))
     entry_date = get_unix_timestamp(datetime.datetime.now()) if request.form['entry_for'] == 'today' else get_date_yesterday()
     Mood(request.form['mood'], request.form['userid'], request.form['username'], entry_date, new=True) 
+    flash(log_reply_message[int(request.form['mood'])])
     return redirect(url_for('dashboard'))
-  return 'try again'
 
 # potential future bot endpoint
 @app.route('/nikobot', methods=['POST'])

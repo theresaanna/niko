@@ -28,8 +28,8 @@ a {
 .tab {
   cursor: pointer;
   color: #898989;
-  margin-right: 20px;
-  padding: 10px;
+  margin-right: 1em;;
+  padding: .6em;
 }
 
 .tab.selected {
@@ -44,10 +44,24 @@ h2, h3 {
 
 section {
   background-color: rgba(208, 224, 235, 0.5);
-  padding: 20px 40px;
-  margin: 40px 0;
+  padding: 1.2em 2.7em;
+  margin: 2.7em 0;
 }
 
 menu {
   list-style: none;
+}
+
+form {
+  margin-bottom: 1em;
+}
+
+.form-spacer {
+  margin-bottom: 1.4em;
+}
+
+input['type=text'],
+input['type=password'],
+input['type=email'] {
+  
 }
