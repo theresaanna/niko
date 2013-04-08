@@ -123,14 +123,16 @@ def get_date(timestamp):
 def get_date_yesterday():
   return get_unix_timestamp(datetime.datetime.now() - timedelta(days=1))
 
-def get_date_range(start_date, end_date):
+# two datetime objs and a bool
+def get_date_range(start_date, end_date, weekday=False):
   date_range = []
   for one_date in (start_date + datetime.timedelta(n) for n in range((end_date - start_date).days + 1)):
-    date_range.append(get_pretty_date(one_date))
+    date_range.append(get_pretty_date(one_date, weekday))
   return date_range
 
-def get_pretty_date(date):
-  return date.strftime('%m/%d/%Y')
+def get_pretty_date(date, day_of_week=False):
+  string_format = '%A %m/%d/%Y' if day_of_week == True else '%m/%d/%Y'
+  return date.strftime(string_format)
 
 def get_entries_by_week():
   monday = get_one_week_ago()
@@ -143,7 +145,7 @@ def get_entries_by_month(ref_date=get_last_available_day()):
     last_day = ref_date
 
   first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(1,0,0), datetime.time(0))
-  return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day)]
+  return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day, True)]
 
 chart_request_params = {
   1: get_entries_by_week,
@@ -162,7 +164,7 @@ def assemble_chart(period):
   template_data['date_range'] = moods.pop()
   template_data['user_records'] = {}
   for record in moods[0]:
-    mood = {get_pretty_date(get_date(record['entry_date'])): record['mood']}
+    mood = {get_pretty_date(get_date(record['entry_date']), day_of_week = True if int(period) > 1 else False): record['mood']}
     if template_data['user_records'].get(record['username']):
       template_data['user_records'][record['username']].append(mood)  
     else:

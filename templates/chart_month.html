@@ -1,30 +1,24 @@
 {% extends "layout.html" %}
 {% block body %}
-{{ chart }}
-{{ weekdays }}
 
 {% if chart %}
   <table class="chart month">
-    <tr class="weekday-header">
-    <td></td>
-    {% for day in weekdays %}
-      <td>{{ day }}</td>
-    {% endfor %}
-    </tr>
     <tr>
     {% for date in chart.date_range %}
-      <td>
-        <strong>{{ date }}</strong>
-        {% for user, records in chart.user_records.items() %}
-          {% for record in records %}
-            {% if date in record %}
-              {{ user }}: {{ record[date] }}
-            {% endif %}
+      <td valign="top">
+        <strong>{{ date }}</strong><br/>
+        <ul>
+          {% for user, records in chart.user_records.items() %}
+            {% for record in records %}
+              {% if date in record %}
+                <li>{{ user }}: {{ record[date] }}</li>
+              {% endif %}
+            {% endfor %}
           {% endfor %}
-        {% endfor %}
+        </ul>
       </td>
-    </tr>
     {% endfor %}
+    </tr>
   </table>
 {% else %}
   Sorry, there's no data for this time period.
