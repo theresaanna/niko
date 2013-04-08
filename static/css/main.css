@@ -1,4 +1,53 @@
-.tab.selected {
-  font-weight: bold;
+body {
+  font-family: 'Sanchez', serif;
+  background: url('../img/tiny_grid.png');
+  color: #464646;
+}
+
+a {
+  color: #898989;
+}
+
+.container {
+  width: 60%;
+  margin: 0 auto;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+.clear {
+  clear: both;
+}
+
+.tab {
   cursor: pointer;
+  color: #898989;
+  margin-right: 20px;
+  padding: 10px;
+}
+
+.tab.selected {
+  color: #464646; 
+  background-color: rgba(208, 224, 235, 0.7);
+}
+
+h2, h3 {
+  border-bottom: 1px solid #c2c2c2;
+  padding-bottom: .25em;
+}
+
+section {
+  background-color: rgba(208, 224, 235, 0.5);
+  padding: 20px 40px;
+  margin: 40px 0;
+}
+
+menu {
+  list-style: none;
 }

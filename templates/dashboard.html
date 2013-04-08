@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<section class="clear">
 <span id="today" class="tab selected">Today</span>
 <span id="yesterday" class="tab">Yesterday</span>
-<h3><span id="greeting">How's it going</span>, {{ user.username }}?</h3>
+<h2><span id="greeting">How's it going</span>, {{ user.username }}?</h2>
 <form action="{{ url_for('log_mood') }}" method="post">
   <input type="radio" name="mood" value="1">
   <input type="radio" name="mood" value="2">
@@ -14,18 +16,20 @@
   <input type="hidden" name="username" value="{{ user.username }}">
   <input type="submit"></input>
 </form>
+</section>
 
-<h4>Check out some charts</h4>
-<form action="{{ url_for('show_chart') }}" method="post">
-  <label>I'd like to see how its going by </label>
-  <select name="time_period">
-    <option value="1" selected>week</option>
-    <option value="2">month</option>
-  </select>,
-  <input type="submit" value="please"></input>.
-</form>
+<section>
+  <h3>Check out some charts</h3>
+  <form action="{{ url_for('show_chart') }}" method="post">
+    <label>I'd like to see how its going by </label>
+    <select name="time_period">
+      <option value="1" selected>week</option>
+      <option value="2">month</option>
+    </select>,
+    <input type="submit" value="please"></input>.
+  </form>
+</section>
 
-<a href="/logout">Logout?</a>
 
 <script src="../static/js/dashboard.js"></script>
 {% endblock %}

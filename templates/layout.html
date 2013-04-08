@@ -4,17 +4,31 @@
   <title>Niko-niko</title>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <link rel="stylesheet" href="../static/css/main.css"></link>
+  <link href='http://fonts.googleapis.com/css?family=Sanchez:400italic,400' rel='stylesheet' type='text/css'>
 </head>
 <body>
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-          {{ message }}
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-  {% block body %}{% endblock %}
+  <div class="container">
+  
+  <h1 class="left">Niko</h1>  
+
+  {% if current_user.is_authenticated() %}
+    <menu class="right">
+      <li><a href="/logout">Logout?</a></li>
+    </menu>
+  {% endif %}
+
+  <div class="clear">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+              {{ message }}
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block body %}{% endblock %}
+    </div>
+  </div>
 </body>
 </html>
