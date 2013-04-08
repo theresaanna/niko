@@ -110,19 +110,14 @@ def get_last_available_day():
   return today - timedelta(days=today.weekday()) + timedelta(days=4, weeks=-1)
 
 # takes datetime obj
-# returns '01-01-70'
-def get_date_string(date):
-  return get_date(get_unix_timestamp(date))
-
-# takes datetime obj
 # returns unix timestamp
 def get_unix_timestamp(date):
   return int(calendar.timegm(date.timetuple()))
 
 # takes unix timestamp
-# returns date in format of 01-01-70
+# returns date object
 def get_date(timestamp):
-  return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%m-%d-%y')
+  return int(calendar.timegm(timestamp.timetuple()))
 
 # returns unix timestamp 
 def get_date_yesterday():
@@ -134,20 +129,14 @@ def get_date_range(start_date, end_date):
     date_range.append(get_date_string(one_date))
   return date_range
 
-def get_last_week():
+def get_entries_by_week():
   monday = get_one_week_ago()
   friday = get_last_available_day()
   return [get_moods((get_unix_timestamp(monday), get_unix_timestamp(friday))), get_date_range(monday, friday)] 
 
-def get_this_month():
-  return
-
-def get_last_month():
-  return
-
 chart_request_params = {
-  1: get_last_week,
-  2: get_this_month
+  1: get_entries_by_week,
+  2: get_entries_by_month
 }
 
 chart_time_map = {
@@ -240,7 +229,7 @@ def export_data():
 @login_required
 def log_mood():
   if request.method == 'POST':
-    entry_date = int(calendar.timegm(datetime.datetime.now().timetuple())) if request.form['entry_for'] == 'today' else get_date_yesterday()
+    entry_date = get_date(datetime.datetime.now()) if request.form['entry_for'] == 'today' else get_date_yesterday()
     Mood(request.form['mood'], request.form['userid'], request.form['username'], entry_date, new=True) 
     return redirect(url_for('dashboard'))
   return 'try again'
