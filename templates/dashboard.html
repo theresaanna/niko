@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
-<span class="tab selected">Today</span>
-<span class="tab">Yesterday</span>
-<h3>How's it going, {{ user.username }}?</h3>
+<span id="today" class="tab selected">Today</span>
+<span id="yesterday" class="tab">Yesterday</span>
+<h3><span id="greeting">How's it going</span>, {{ user.username }}?</h3>
 <form action="{{ url_for('log_mood') }}" method="post">
   <input type="radio" name="mood" value="1">
   <input type="radio" name="mood" value="2">
   <input type="radio" name="mood" value="3">
   <input type="radio" name="mood" value="4">
   <input type="radio" name="mood" value="5">
-  <input type="hidden" name="entry_for" value="today">
+  <input type="hidden" name="entry_for" value="today" id="date-input">
   <input type="hidden" name="userid" value="{{ user.id }}">
   <input type="hidden" name="username" value="{{ user.username }}">
   <input type="submit"></input>
@@ -24,4 +24,6 @@
   </select>,
   <input type="submit" value="please"></input>.
 </form>
+
+<script src="../static/js/dashboard.js"></script>
 {% endblock %}
