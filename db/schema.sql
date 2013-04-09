@@ -2,7 +2,8 @@ create table users (
   id integer primary key,
   username string not null,
   email string not null,
-  password string not null
+  password string not null,
+  team integer
 );
 
 create table entries (
@@ -11,4 +12,9 @@ create table entries (
   username string,
   mood integer,
   entry_date integer
+);
+
+create table teams (
+  id integer primary key,
+  name string not null
 );
