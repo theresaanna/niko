@@ -271,6 +271,13 @@ def dashboard():
   team_name = get_team_name(g.user.team)[0]['name']
   return render_template('dashboard.html', user = g.user, team_name = team_name)
 
+# change team association
+@app.route('/changeteam')
+@login_required
+def change_team():
+  return render_template('change-team.html', teams = get_team_list())
+    
+# associate user and team
 @app.route('/jointeam', methods=['POST'])
 @login_required
 def join_team():
@@ -286,7 +293,7 @@ def join_team():
   else:
     team_id = int(request.form['team'])
   g.user.set_team(team_id)
-  flash("Awesome, thanks. Carry on!")
+  flash("Sweet, got it. Welcome to the team!")
   return redirect(url_for('dashboard'))
 
 # chart request

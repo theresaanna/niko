@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<section class="cf">
+  <h2>My team association</h2>
+  <p>In Niko, you can only actively belong to one team. Happy teams are dedicated teams. You could cheat by having multiple logins if you really want to.</p>
+  <p>If you switch teams, your entries for days past on your former team will stick around. Your new entries will just be logged against your new team.</p>
+  <form action="{{ url_for('join_team') }}" method="post">
+    <div class="form-spacer">
+      <select name="team" id="team-name-field">
+        <option selected></option>
+        {% for team in teams %}
+          <option value="{{ team.id }}">{{ team.name }}</option>
+        {% endfor %}
+        <option value="new" id="create-team">Create new team</option>
+      </select>
+    </div>
+
+    <div id="new-team-name-field" class="hidden">
+      <label for="new-team-name">New team's name:</label>
+      <input type="text" name="new-team-name" id="team-name" placeholder="team name"></input>
+    </div>
+
+    <input type="submit" class="right"></input>
+  </form>
+</section>
+
+<script src="../static/js/dashboard.js"></script>
+{% endblock %}
