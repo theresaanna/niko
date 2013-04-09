@@ -1,27 +1,61 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<section>
-<span id="today" class="tab selected">Today</span>
-<span id="yesterday" class="tab">Yesterday</span>
-<h2><span id="greeting">How's it going</span>, {{ user.username }}?</h2>
-<form action="{{ url_for('log_mood') }}" method="post">
-
-  <div class="form-spacer">
-    <img src="../static/img/1.png" class="mood-face" data-value="1"/>
-    <img src="../static/img/2.png" class="mood-face" data-value="2"/>
-    <img src="../static/img/3.png" class="mood-face" data-value="3"/>
-    <img src="../static/img/4.png" class="mood-face" data-value="4"/>
-    <img src="../static/img/5.png" class="mood-face" data-value="5"/>
-    <input type="hidden" name="mood" id="mood-input" value="">
+{% if user.team %}
+  <section>
+  <div class="note right">
+    {% if team_name %}
+      My team: <a href="/changeteam">{{ team_name }}</a> 
+    {% endif %}
   </div>
+  <span id="today" class="tab selected">Today</span>
+  <span id="yesterday" class="tab">Yesterday</span>
+  <h2><span id="greeting">How's it going</span>, {{ user.username }}?</h2>
+  <form action="{{ url_for('log_mood') }}" method="post">
 
-  <input type="hidden" name="entry_for" value="today" id="date-input">
-  <input type="hidden" name="userid" value="{{ user.id }}">
-  <input type="hidden" name="username" value="{{ user.username }}">
-  <input type="submit"></input>
-</form>
-</section>
+    <div class="form-spacer">
+      <img src="../static/img/1.png" class="mood-face" data-value="1"/>
+      <img src="../static/img/2.png" class="mood-face" data-value="2"/>
+      <img src="../static/img/3.png" class="mood-face" data-value="3"/>
+      <img src="../static/img/4.png" class="mood-face" data-value="4"/>
+      <img src="../static/img/5.png" class="mood-face" data-value="5"/>
+      <input type="hidden" name="mood" id="mood-input" value="">
+    </div>
+
+    <input type="hidden" name="entry_for" value="today" id="date-input"></input>
+    <input type="hidden" name="userid" value="{{ user.id }}"></input>
+    <input type="hidden" name="username" value="{{ user.username }}"></input>
+    <input type="hidden" name="team" value="{{ user.team }}"></input>
+    <input type="submit"></input>
+  </form>
+  </section>
+{% else %}
+
+  <section class="cf">
+    <h2>Join a team, please</h2>
+    <p>Before you can log how you're doing, you have to join a team so that we know the context of your mood.</p>
+
+    <form action="{{ url_for('join_team') }}" method="post">
+      <div class="form-spacer">
+        <select name="team" id="team-name-field">
+          <option selected></option>
+          {% for team in teams %}
+            <option value="{{ team.id }}">{{ team.name }}</option>
+          {% endfor %}
+          <option value="new" id="create-team">Create new team</option>
+        </select>
+      </div>
+
+      <div id="new-team-name-field" class="hidden">
+        <label for="new-team-name">New team's name:</label>
+        <input type="text" name="new-team-name" id="team-name" placeholder="team name"></input>
+      </div>
+
+      <input type="submit" class="right"></input>
+    </form>
+  
+  </section>
+{% endif %}
 
 <section>
   <h3>Check out some charts</h3>

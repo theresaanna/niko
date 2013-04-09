@@ -37,10 +37,11 @@ login_manager.setup_app(app)
 
 # constructors
 class User(UserMixin):
-  def __init__(self, username, email, password, id, register=False, active=True):
+  def __init__(self, username, email, password, team, id, register=False, active=True):
     self.username = username
     self.email = email
     self.password = password
+    self.team = team
     self.id = id
     self.register = register
     if register:
@@ -55,6 +56,11 @@ class User(UserMixin):
 
   def _set_id(self):
     self.id = query_db('select id from users where username=?', (self.username,))
+
+  def set_team(self, team_id):
+    g.db.execute('update users set team = ? where id = ?', (team_id, self.id))
+    g.db.commit()
+    self.team = team_id
 
 class Mood():
   def __init__(self, value, userid, username, entry_date, new=False):
@@ -84,10 +90,19 @@ def load_user_by_name(username):
 
 # for creating User objects for existing accounts
 def create_user_instance(identifier, param_type):
-  db_user = query_db('select username, email, password, id from users where (' + param_type + ' = ?)', (identifier,), one=True)
+  db_user = query_db('select username, email, password, team, id from users where (' + param_type + ' = ?)', (identifier,), one=True)
   if db_user:
-    return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('id'))
+    return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('team'), db_user.get('id'))
   return None
+
+# returns team id int
+def create_team(team_name):
+  cur = g.db.cursor()
+  g.db.execute('insert into teams (name) values (?)', (team_name,))
+  g.db.commit()
+  team_id = cur.lastrowid
+  cur.close()
+  return team_id
 
 # gives nice return value from db query
 def query_db(query, args=(), one=False):
@@ -101,8 +116,8 @@ def get_moods(timespan):
   assert not isinstance(timespan, basestring)
   return query_db('select * from entries where entry_date > ? and entry_date < ? order by entry_date asc', (timespan[0], timespan[1]))
 
-def get_team_members():
-  return query_db('select username, id from users')
+def get_team_name(team_id):
+  return query_db('select name from teams where id = ?', (team_id,))
 
 # returns monday of last week
 def get_one_week_ago():
@@ -151,6 +166,9 @@ def get_entries_by_month(ref_date=get_last_available_day()):
 
   first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(0), datetime.time(0))
   return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day, True)]
+
+def get_team_list():
+  return query_db('select id, name from teams')
 
 chart_request_params = {
   1: get_entries_by_week,
@@ -216,7 +234,8 @@ def login_page():
     if g.user.check_password(request.form.get('password')):
       login_user(g.user, remember=True)
       return redirect(url_for('dashboard'))
-    return 'nope'
+    flash("Didn't work. Try again, please.")
+    return render_template('login.html')
   return render_template('login.html') 
 
 # logout
@@ -232,7 +251,7 @@ def register_user():
   if request.method == 'POST':
     validation_errors = validate_register_form(request.form)
     if not validation_errors:
-      user = User(request.form['username'], request.form['email'], request.form['password'], '', register=True)
+      user = User(request.form['username'], request.form['email'], request.form['password'], '', '', register=True)
       g.db.execute('insert into users (username, email, password) values (?, ?, ?)', 
                 [user.username, user.email, user.hashed_pw])
       g.db.commit()
@@ -246,9 +265,29 @@ def register_user():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-  # if user has a mood for today
-  # change form in template
-  return render_template('dashboard.html', user = g.user)
+  if not g.user.team:
+    teams = get_team_list()
+    return render_template('dashboard.html', user = g.user, teams = teams)
+  team_name = get_team_name(g.user.team)[0]['name']
+  return render_template('dashboard.html', user = g.user, team_name = team_name)
+
+@app.route('/jointeam', methods=['POST'])
+@login_required
+def join_team():
+  if not request.form['team']:
+    flash("Sorry, I didn't catch your team choice. Try again?")
+    return redirect(url_for('dashboard'))
+  
+  if request.form['team'] == 'new':
+    if not request.form['new-team-name']:
+      flash("If you'd like to create a new team, please input a name for it")
+      return redirect(url_for('dashboard'))
+    team_id = create_team(request.form['new-team-name'])
+  else:
+    team_id = int(request.form['team'])
+  g.user.set_team(team_id)
+  flash("Awesome, thanks. Carry on!")
+  return redirect(url_for('dashboard'))
 
 # chart request
 @app.route('/chart', methods=['POST'])

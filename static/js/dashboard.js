@@ -31,6 +31,11 @@ $(document).ready(function() {
     }
   });
 
+  $('#team-name-field').on("change", function(e) {
+    if ($('option:selected', this).val() === 'new') {
+      $('#new-team-name-field').slideToggle('slow');
+  }
+  });
 
 });
 
