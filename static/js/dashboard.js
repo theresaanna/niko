@@ -25,7 +25,13 @@ $(document).ready(function() {
       $("#mood-input").val(moodVal);
       classSwitch($this);
     }
+    else {
+      $this.removeClass('selected');
+      $("#mood-input").val('');
+    }
   });
+
+
 });
 
 Niko = {
