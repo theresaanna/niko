@@ -2,6 +2,8 @@
 {% block body %}
 
 {% if chart %}
+  <a id="chart-note-link" href="" class="note right">Wait, there are more entries...</a>
+  <p class="right hidden" id="chart-note">The chart will only display entries from last Friday and back. Its pretty easy to feel unsure and give an inaccurate report on the day if you can compare it to your teammates' entries, so they're hidden for now.</p>
   <table class="chart week">
     <tr class="weekday-header">
     <td></td>
@@ -31,4 +33,6 @@
 {% else %}
   Sorry, there's no data for this time period.
 {% endif %}
+
+<script src="../static/js/chart.js"></script>
 {% endblock %}
