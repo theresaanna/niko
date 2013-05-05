@@ -141,7 +141,12 @@ def get_date(timestamp):
 
 # returns unix timestamp 
 def get_date_yesterday():
-  return get_unix_timestamp(datetime.datetime.now() - timedelta(days=1))
+  return datetime.datetime.now() - timedelta(days=1)
+
+def get_timestamp_range(date):
+  start = get_unix_timestamp(date - timedelta(hours=24))
+  end = get_unix_timestamp(date - timedelta(hours=0))
+  return (start, end)
 
 # two datetime objs and a bool
 def get_date_range(start_date, end_date, weekday=False):
@@ -166,6 +171,10 @@ def get_entries_by_month(ref_date=get_last_available_day()):
 
   first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(0), datetime.time(0))
   return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day, True)]
+
+def has_already_submitted(date):
+  date = get_timestamp_range(date)
+  return query_db('select id from entries where entry_date > ? and entry_date < ? and userid = ?', (date[0], date[1], g.user.id))
 
 def get_team_list():
   return query_db('select id, name from teams')
@@ -269,6 +278,7 @@ def dashboard():
     teams = get_team_list()
     return render_template('dashboard.html', user = g.user, teams = teams)
   team_name = get_team_name(g.user.team)[0]['name']
+  # get today and yesterday, make form inactive
   return render_template('dashboard.html', user = g.user, team_name = team_name)
 
 # change team association
@@ -328,10 +338,21 @@ def log_mood():
     if not request.form['mood']:
       flash('Please select a mood before submitting')
       return redirect(url_for('dashboard'))
-    entry_date = get_unix_timestamp(datetime.datetime.now()) if request.form['entry_for'] == 'today' else get_date_yesterday()
-    Mood(request.form['mood'], request.form['userid'], request.form['username'], entry_date, new=True) 
+    entry_date = datetime.datetime.now() if request.form['entry_for'] == 'today' else get_date_yesterday()
+    if has_already_submitted(entry_date):
+      return redirect(url_for('overwrite_entry'))
+    Mood(request.form['mood'], request.form['userid'], request.form['username'], get_unix_timestamp(entry_date), new=True) 
     flash(log_reply_message[int(request.form['mood'])])
     return redirect(url_for('dashboard'))
+
+@app.route('/overwrite', methods=['GET', 'POST'])
+@login_required
+def overwrite_entry():
+  if request.method == 'POST':
+    # drop existing record
+    # reroute to log
+    pass
+  return render_template('overwrite-entry.html')
 
 # potential future bot endpoint
 @app.route('/nikobot', methods=['POST'])
