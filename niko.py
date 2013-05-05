@@ -7,7 +7,8 @@ from datetime import timedelta
 from calendar import timegm
 from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
-from werkzeug.security import generate_password_hash, check_password_hash
+from Niko_User import User
+from Niko_DB import connect_db, query_db
 
 # init things
 app = Flask(__name__)
@@ -18,12 +19,9 @@ app.config.db = '/home/ubuntu/niko/db/niko.db'
 app.secret_key = 'hi'
 
 # db communication setup
-def connect_db():
-  return sqlite3.connect(app.config.db)
-
 @app.before_request
 def before_request():
-  g.db = connect_db()
+  g.db = connect_db(app.config.db)
   if current_user is not None:
     g.user = current_user
 
@@ -36,32 +34,6 @@ login_manager = LoginManager()
 login_manager.setup_app(app)
 
 # constructors
-class User(UserMixin):
-  def __init__(self, username, email, password, team, id, register=False, active=True):
-    self.username = username
-    self.email = email
-    self.password = password
-    self.team = team
-    self.id = id
-    self.register = register
-    if register:
-      self._hash_password(password)
-      self._set_id()
-
-  def _hash_password(self, password):
-    self.hashed_pw = generate_password_hash(str(password))
-
-  def check_password(self, form_password):
-    return check_password_hash(self.password, str(form_password))
-
-  def _set_id(self):
-    self.id = query_db('select id from users where username=?', (self.username,))
-
-  def set_team(self, team_id):
-    g.db.execute('update users set team = ? where id = ?', (team_id, self.id))
-    g.db.commit()
-    self.team = team_id
-
 class Mood():
   def __init__(self, value, userid, username, entry_date, new=False):
     self.value = value
@@ -103,13 +75,6 @@ def create_team(team_name):
   team_id = cur.lastrowid
   cur.close()
   return team_id
-
-# gives nice return value from db query
-def query_db(query, args=(), one=False):
-    cur = g.db.execute(query, args)
-    rv = [dict((cur.description[idx][0], value)
-               for idx, value in enumerate(row)) for row in cur.fetchall()]
-    return (rv[0] if rv else None) if one else rv
 
 # timespan = tuple(recent date, oldest date)
 def get_moods(timespan):
