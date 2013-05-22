@@ -1,4 +1,4 @@
-create table users (
+create table if not exists users (
   id integer primary key,
   username string not null,
   email string not null,
@@ -6,7 +6,7 @@ create table users (
   team integer
 );
 
-create table entries (
+create table if not exists entries (
   id integer primary key,
   userid integer,
   username string,
@@ -14,7 +14,7 @@ create table entries (
   entry_date integer
 );
 
-create table teams (
+create table if not exists teams (
   id integer primary key,
   name string not null
 );
