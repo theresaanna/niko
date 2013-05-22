@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin, LoginManager
-from Niko_DB import query_db
+from Niko_DB import query_db, update_db
 
 class User(UserMixin):
   def __init__(self, username, email, password, team, id, register=False, active=True):
@@ -21,11 +21,10 @@ class User(UserMixin):
     return check_password_hash(self.password, str(form_password))
 
   def _set_id(self):
-    self.id = query_db('select id from users where username=?', (self.username,))
+    self.id = update_db('select id from users where username=?', (self.username,))
 
   def set_team(self, team_id):
-    g.db.execute('update users set team = ? where id = ?', (team_id, self.id))
-    g.db.commit()
+    update_db('update users set team = ? where id = ?', (team_id, self.id))
     self.team = team_id
 
 # dependency of flask-login

@@ -11,4 +11,7 @@ def query_db(query, args=(), one=False):
                for idx, value in enumerate(row)) for row in cur.fetchall()]
     return (rv[0] if rv else None) if one else rv
 
-
+def update_db(query, args=()):
+  g.db.execute(query, args)
+  g.db.commit()
+  return
