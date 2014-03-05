@@ -1,6 +1,5 @@
 # Niko
 ==============
-
 Supporting the idea that team member happiness is a valuable indicator of team success. More on the Niko Niko method of tracking team happiness: [http://agiletrail.com/2011/09/12/how-to-track-the-teams-mood-with-a-niko-niko-calendar/]
 
 Niko is very much under development.
