@@ -15,4 +15,8 @@ It has a simple interface to let team members log their mood based on five diffe
 There are other much prettier apps that will collect mood tracking information. I needed to be able to install a tool that would capture data on internal servers, hence Niko.
 
 ##How?
-Niko is still very much in development. My hope is that you can clone, grab dependencies, configure and run it in short and easy steps. Once that's possible, I'll outline them here.
+To run Niko:
+```pip install Flask
+pip install flask-login
+python niko.py
+```
