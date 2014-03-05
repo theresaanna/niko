@@ -12,14 +12,12 @@ from Niko_DB import connect_db, query_db
 # init things
 app = Flask(__name__)
 
-app.config.db = 'db/dev.db'
-
-app.secret_key = 'hi'
+app.config.from_pyfile('config.cfg')
 
 # db communication setup
 @app.before_request
 def before_request():
-  g.db = connect_db(app.config.db)
+  g.db = connect_db(app.config['DB'])
   if current_user is not None:
     g.user = current_user
 
