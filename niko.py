@@ -12,9 +12,8 @@ from Niko_DB import connect_db, query_db
 # init things
 app = Flask(__name__)
 
-app.config.db = '/home/ubuntu/niko/db/niko.db'
+app.config.db = 'db/dev.db'
 
-# this... doesn't feel right
 app.secret_key = 'hi'
 
 # db communication setup
