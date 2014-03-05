@@ -29,6 +29,13 @@ pip install -r requirements.txt
 sqlite3 db/dev.db < db/schema.sql
 ```
 
+### To configure Niko:
+```
+cd niko
+cp example_config.cfg config.cfg
+```
+And make changes.
+
 ### To run Niko:
 ```
 python niko.py
