@@ -16,7 +16,8 @@ There are other much prettier apps that will collect mood tracking information. 
 
 ##How?
 To run Niko:
-```pip install Flask
+```
+pip install Flask
 pip install flask-login
 python niko.py
 ```
