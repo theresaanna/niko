@@ -1,5 +1,5 @@
 from Niko_DB import query_db
-from flask.ext.login import g
+from flask import g
 
 class Mood():
   def __init__(self, value, userid, username, entry_date, new=False):

@@ -23,9 +23,11 @@
     <tr>
       <td>{{ user }}</td>
       {% for date in chart.date_range %}
+        <td>
         {% for record in records %}
-        <td>{{ record[date] }}</td> 
+            {{ record[date] }} 
         {% endfor %}
+        </td>
       {% endfor %}
     </tr>
     {% endfor %}

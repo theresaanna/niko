@@ -8,6 +8,7 @@ from flask import Flask, request, session, redirect, url_for, g, render_template
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
 from Niko_User import User
 from Niko_DB import connect_db, query_db
+from Niko_Mood import Mood
 
 # init things
 app = Flask(__name__)
@@ -28,23 +29,6 @@ def teardown_request(exception):
 # flask-login init
 login_manager = LoginManager()
 login_manager.setup_app(app)
-
-# constructors
-class Mood():
-  def __init__(self, value, userid, username, entry_date, new=False):
-    self.value = value
-    self.userid = userid
-    self.username = username
-    self.entry_date = entry_date
-    self.new = new
-    if self.new:
-      self._store_mood()
-
-  def _store_mood(self):
-    entry = query_db('insert into entries (mood, userid, username, entry_date) values (?, ?, ?, ?)', [self.value, self.userid, self.username, self.entry_date])
-    g.db.commit()
-
-# helpers
 
 # dependency of flask-login
 # does flask-login tear this down somewhere?
@@ -160,7 +144,6 @@ log_reply_message = {
 
 days_of_week = ['M', 'Tu', 'W', 'Th', 'F']
 
-# oh man
 def validate_register_form(form):
   if not form['username']:
     return 'Please choose a username'
@@ -174,7 +157,6 @@ def validate_register_form(form):
     return 'This username is already taken'
   return False
 
-# yuck
 def assemble_chart(period):
   moods = chart_request_params[int(period)]()  
   template_data = {}
