@@ -58,10 +58,10 @@ def load_user_by_name(username):
 
 # for creating User objects for existing accounts
 def create_user_instance(identifier, param_type):
-  db_user = query_db('select username, email, password, team, id from users where (' + param_type + ' = ?)', (identifier,), one=True)
-  if db_user:
-    return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('team'), db_user.get('id'))
-  return None
+    db_user = query_db('select username, email, password, team, id from users where (' + param_type + ' = ?)', (identifier,), one=True)
+    if db_user:
+        return User(db_user.get('username'), db_user.get('email'), db_user.get('password'), db_user.get('team'), db_user.get('id'))
+    return None
 
 # returns team id int
 def create_team(team_name):
@@ -201,6 +201,11 @@ def index():
 def login_page():
   if request.method == 'POST':
     g.user = load_user_by_name(request.form.get('username'))
+    print g.user
+    if g.user is None:
+        flash("We couldn't find a user with that information.")
+        return redirect(url_for('login_page'))
+
     if g.user.check_password(request.form.get('password')):
       login_user(g.user, remember=True)
       return redirect(url_for('dashboard'))
