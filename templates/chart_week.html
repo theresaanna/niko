@@ -25,7 +25,9 @@
       {% for date in chart.date_range %}
         <td>
         {% for record in records %}
-            {{ record[date] }} 
+            {% if record[date] %}
+                <img src="../static/img/{{ record[date] }}.png"/>
+            {% endif %}
         {% endfor %}
         </td>
       {% endfor %}

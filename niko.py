@@ -3,6 +3,7 @@ import time
 import calendar
 import json
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from calendar import timegm
 from flask import Flask, request, session, redirect, url_for, g, render_template, abort, flash
 from flask.ext.login import (LoginManager, current_user, redirect, login_required, login_user, logout_user, UserMixin, confirm_login)
@@ -117,6 +118,11 @@ def get_entries_by_month(ref_date=get_last_available_day()):
   first_day = datetime.datetime.combine(datetime.date(ref_date.year, ref_date.month, 1) + datetime.timedelta(0), datetime.time(0))
   return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day, True)]
 
+def get_entries_by_year(ref_date=get_last_available_day()):
+    last_day = ref_date
+    first_day = last_day+relativedelta(years=-1)
+    return [get_moods((get_unix_timestamp(first_day), get_unix_timestamp(last_day))), get_date_range(first_day, last_day, True)]
+
 def has_already_submitted(date):
   date = get_timestamp_range(date)
   return query_db('select id from entries where entry_date > ? and entry_date < ? and userid = ?', (date[0], date[1], g.user.id))
@@ -125,13 +131,15 @@ def get_team_list():
   return query_db('select id, name from teams')
 
 chart_request_params = {
-  1: get_entries_by_week,
-  2: get_entries_by_month
+    1: get_entries_by_week,
+    2: get_entries_by_month,
+    3: get_entries_by_year
 }
 
 chart_time_map = {
-  1: 'week',
-  2: 'month'
+    1: 'week',
+    2: 'month',
+    3: 'year'
 }
 
 log_reply_message = {
@@ -271,6 +279,11 @@ def show_chart_week():
 @login_required
 def show_chart_month():
   return render_template('chart_month.html', chart = assemble_chart(2), weekdays = days_of_week)
+
+@app.route('/chart/year')
+@login_required
+def show_chart_year():
+  return render_template('chart_year.html', chart = assemble_chart(3), weekdays = days_of_week)
 
 @app.route('/export')
 @login_required
