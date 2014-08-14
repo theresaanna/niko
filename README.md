@@ -34,7 +34,7 @@ sqlite3 db/dev.db < db/schema.sql
 cd niko
 cp example_config.cfg config.cfg
 ```
-And make changes.
+Be sure to change the value of ```SECRET_KEY```
 
 ### To run Niko:
 ```
